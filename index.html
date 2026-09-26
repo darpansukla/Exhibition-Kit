@@ -18,12 +18,11 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #fcfcfc;
         }
-        /* Apple-style smooth glass / liquid red gradients */
         .apple-gradient {
             background: linear-gradient(135deg, #FF3B30 0%, #D70015 100%);
         }
         .liquid-card {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 59, 48, 0.12);
@@ -43,8 +42,14 @@
             </h1>
             <p class="text-[10px] text-red-100 font-medium tracking-wide">Made by Darpan Sukla</p>
         </div>
-        <div id="step-indicator" class="text-xs bg-black/20 backdrop-blur-md px-3 py-1 rounded-full font-semibold border border-white/10">
-            Step 1 of 3
+        <div class="flex items-center gap-2">
+            <!-- Hidden Admin Icon Trigger -->
+            <button onclick="openAdminPrompt()" class="p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10 text-white active:scale-95 transition" title="Admin">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </button>
+            <div id="step-indicator" class="text-xs bg-black/20 backdrop-blur-md px-3 py-1 rounded-full font-semibold border border-white/10">
+                Step 1 of 3
+            </div>
         </div>
     </header>
 
@@ -100,9 +105,9 @@
             </div>
 
             <!-- Slots Container -->
-            <div id="student-slots-container" class="space-y-3.5"></div>
+            <div id="student-slots-container" class="space-y-4"></div>
 
-            <div class="pt-2">
+            <div class="pt-2 pb-6">
                 <button onclick="goToPayment()" id="proceed-pay-btn" class="w-full apple-gradient text-white font-semibold py-4 rounded-2xl apple-shadow active:scale-[0.98] transition flex items-center justify-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
                     <span>Proceed to Payment (₹<span id="btn-total-fee">500</span>)</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -111,7 +116,7 @@
         </div>
 
         <!-- SCREEN 3: PAYMENT SCREEN -->
-        <div id="screen-3" class="hidden space-y-4 pt-2">
+        <div id="screen-3" class="hidden space-y-4 pt-2 pb-6">
             <button onclick="goBackToScreen2()" class="text-xs text-red-600 font-semibold flex items-center gap-1 py-1">
                 <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Student Selection
             </button>
@@ -154,9 +159,53 @@
 
     </main>
 
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-red-600"></i> Summary Dashboard
+                </h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-xs font-bold p-1">✕</button>
+            </div>
+            
+            <div class="space-y-3 overflow-y-auto flex-1 pr-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-red-50 border border-red-100 p-3 rounded-2xl text-center space-y-1">
+                        <span class="text-[9px] uppercase font-bold text-red-600 tracking-wider block">Total Students</span>
+                        <h2 id="admin-total-students" class="text-xl font-extrabold text-slate-900">0</h2>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl text-center space-y-1">
+                        <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider block">Total Collection</span>
+                        <h2 id="admin-total-collection" class="text-xl font-extrabold text-red-600">₹0</h2>
+                    </div>
+                </div>
+
+                <!-- Registered Students List Section -->
+                <div class="space-y-1.5 pt-1">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Registered Students List</span>
+                    <div id="admin-students-list" class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 max-h-48 overflow-y-auto space-y-1.5 text-xs">
+                        <p class="text-slate-400 text-center py-4 text-[11px]">Loading names...</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeAdminModal()" class="w-full bg-slate-900 text-white font-semibold py-3 rounded-2xl text-xs mt-auto">
+                Close Dashboard
+            </button>
+        </div>
+    </div>
+
     <!-- App Logic Script -->
     <script>
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9MYoRpbaJg7oK3vqkTjfsm616eD9xvUeeE3DxTSzWCF5gCdBOdqfnQQbbwbnycXopvrScE5kg-3R6/pub?gid=0&single=true&output=csv";
+        // 1. Student Master List CSV (Used for searching and picking students)
+        const STUDENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9MYoRpbaJg7oK3vqkTjfsm616eD9xvUeeE3DxTSzWCF5gCdBOdqfnQQbbwbnycXopvrScE5kg-3R6/pub?gid=0&single=true&output=csv";
+        
+        // 2. Admin & Orders Submissions CSV (Used for the admin dashboard summary)
+        const ADMIN_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRx5a_SP-qNjx5D8gBDFZaoHgyyOyQezeM1BdBHaLmpqNPGlJ0aHrT1qYbOJtdzlSyRnBz7-OhhE0go/pub?gid=0&single=true&output=csv";
+        
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyhH7TlVYDSODNCzRxnHEd9IIkwuKvgpfFvKFjwJtZ1i3swwyCsxEpxDQReNWwD8E49w/exec";
         const UPI_ID = "sdarpan128@oksbi";
         const FEE_PER_KIT = 500;
 
@@ -166,7 +215,8 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            Papa.parse(CSV_URL, {
+            // Load student directory for search
+            Papa.parse(STUDENT_CSV_URL, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
@@ -176,7 +226,7 @@
                     document.getElementById('screen-1').classList.remove('hidden');
                 },
                 error: function() {
-                    document.getElementById('screen-loading').innerHTML = '<p class="text-red-500 text-xs text-center">Failed to load Google Sheet data. Please check connection.</p>';
+                    document.getElementById('screen-loading').innerHTML = '<p class="text-red-500 text-xs text-center">Failed to load Student list CSV. Check URL.</p>';
                 }
             });
         });
@@ -255,15 +305,17 @@
                         <span class="text-[11px] text-slate-400 font-medium">₹500 Fee</span>
                     </div>
 
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <i data-lucide="search" class="w-4 h-4"></i>
+                    <div id="search-box-wrap-${i}" class="space-y-2">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                            </div>
+                            <input type="text" placeholder="Type student name to search..." 
+                                oninput="filterStudents(${i}, this.value)" id="search-slot-${i}"
+                                class="w-full pl-9 pr-3 py-2.5 bg-slate-50/80 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
-                        <input type="text" placeholder="Type student name to search..." 
-                            oninput="filterStudents(${i}, this.value)" id="search-slot-${i}"
-                            class="w-full pl-9 pr-3 py-2.5 bg-slate-50/80 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
                         
-                        <div id="dropdown-slot-${i}" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto z-30"></div>
+                        <div id="dropdown-slot-${i}" class="hidden bg-white border border-slate-200 rounded-2xl shadow-md max-h-48 overflow-y-auto space-y-1 p-1"></div>
                     </div>
 
                     <div id="preview-slot-${i}" class="hidden flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
@@ -274,7 +326,7 @@
                                 <p id="class-slot-${i}" class="text-[10px] text-slate-500"></p>
                             </div>
                         </div>
-                        <button onclick="clearSlot(${i})" class="text-xs text-red-600 font-semibold px-2 py-1 bg-red-50 rounded-lg">Change</button>
+                        <button onclick="clearSlot(${i})" class="text-xs text-red-600 font-semibold px-2.5 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition">Change</button>
                     </div>
                 `;
                 container.appendChild(slotDiv);
@@ -308,10 +360,10 @@
                 const photo = formatGoogleDriveUrl(student['Passport Photo URL']);
 
                 const item = document.createElement('div');
-                item.className = "flex items-center space-x-3 p-2.5 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer";
+                item.className = "flex items-center space-x-3 p-2.5 hover:bg-red-50 rounded-xl border-b border-slate-100 last:border-0 cursor-pointer transition";
                 item.onclick = () => selectStudentForSlot(slotIndex, student);
                 item.innerHTML = `
-                    <img src="${photo}" class="w-8 h-8 rounded-xl object-cover border bg-slate-100" onerror="this.src='https://via.placeholder.com/40?text=User'">
+                    <img src="${photo}" class="w-8 h-8 rounded-lg object-cover border bg-slate-100" onerror="this.src='https://via.placeholder.com/40?text=User'">
                     <div>
                         <p class="font-semibold text-xs text-slate-900">${name}</p>
                         <p class="text-[10px] text-slate-500">Class: ${className}</p>
@@ -327,7 +379,7 @@
 
             document.getElementById(`dropdown-slot-${slotIndex}`).classList.add('hidden');
             document.getElementById(`search-slot-${slotIndex}`).value = '';
-            document.getElementById(`search-slot-${slotIndex}`).parentElement.classList.add('hidden');
+            document.getElementById(`search-box-wrap-${slotIndex}`).classList.add('hidden');
 
             const preview = document.getElementById(`preview-slot-${slotIndex}`);
             preview.classList.remove('hidden');
@@ -342,7 +394,7 @@
         function clearSlot(slotIndex) {
             delete selectedStudentsMap[slotIndex];
             document.getElementById(`preview-slot-${slotIndex}`).classList.add('hidden');
-            document.getElementById(`search-slot-${slotIndex}`).parentElement.classList.remove('hidden');
+            document.getElementById(`search-box-wrap-${slotIndex}`).classList.remove('hidden');
             document.getElementById(`search-slot-${slotIndex}`).value = '';
             updateTotalFeeDisplay();
         }
@@ -358,15 +410,36 @@
         }
 
         function goToPayment() {
+            let studentsArray = [];
+            for (let i = 0; i < selectedQuantity; i++) {
+                if (selectedStudentsMap[i]) {
+                    studentsArray.push(selectedStudentsMap[i]);
+                }
+            }
+
+            const totalAmount = selectedQuantity * FEE_PER_KIT;
+
+            if (APPS_SCRIPT_URL) {
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quantity: selectedQuantity,
+                        totalAmount: totalAmount,
+                        students: studentsArray
+                    })
+                }).catch(err => console.error("Sheet sync error:", err));
+            }
+
             document.getElementById('screen-2').classList.add('hidden');
             document.getElementById('screen-3').classList.remove('hidden');
             document.getElementById('step-indicator').innerText = "Step 3 of 3";
 
-            const totalAmount = selectedQuantity * FEE_PER_KIT;
             document.getElementById('summary-total-amount').innerText = `₹${totalAmount}`;
             document.getElementById('summary-count-text').innerText = `For ${selectedQuantity} student kit(s)`;
 
-            const firstStudentName = selectedStudentsMap[0] ? selectedStudentsMap[0]['Student Name'] : 'Student';
+            const firstStudentName = studentsArray[0] ? studentsArray[0]['Student Name'] : 'Student';
             const remark = selectedQuantity > 1 ? `${firstStudentName}_and_${selectedQuantity - 1}_others_Exhibition_Kit` : `${firstStudentName}_Exhibition_Kit`;
             
             document.getElementById('display-remark').innerText = remark;
@@ -384,6 +457,70 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
             lucide.createIcons();
+        }
+
+        // Admin Security & Summary Calculations
+        function openAdminPrompt() {
+            const pin = prompt("Enter Admin PIN:");
+            if (pin === "1998") {
+                calculateAdminSummary();
+                document.getElementById('admin-modal').classList.remove('hidden');
+                lucide.createIcons();
+            } else if (pin !== null) {
+                alert("Incorrect PIN");
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function calculateAdminSummary() {
+            Papa.parse(ADMIN_CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const rows = results.data;
+                    let totalStudentsCount = 0;
+                    let totalCollectionAmount = 0;
+                    let allNamesList = [];
+
+                    rows.forEach(row => {
+                        let count = parseInt(row['No. of Student']) || 0;
+                        let amt = parseFloat(row['Amount']) || 0;
+                        let namesStr = row['Name'] || '';
+
+                        totalStudentsCount += count;
+                        totalCollectionAmount += amt;
+
+                        if (namesStr.trim() !== '') {
+                            namesStr.split(',').forEach(n => {
+                                let trimmed = n.trim();
+                                if (trimmed) allNamesList.push(trimmed);
+                            });
+                        }
+                    });
+
+                    document.getElementById('admin-total-students').innerText = totalStudentsCount;
+                    document.getElementById('admin-total-collection').innerText = `₹${totalCollectionAmount}`;
+
+                    const listContainer = document.getElementById('admin-students-list');
+                    if (allNamesList.length === 0) {
+                        listContainer.innerHTML = '<p class="text-slate-400 text-center py-2 text-[11px]">No student entries found yet.</p>';
+                    } else {
+                        listContainer.innerHTML = '';
+                        allNamesList.forEach((name, index) => {
+                            const rowItem = document.createElement('div');
+                            rowItem.className = "flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-slate-100";
+                            rowItem.innerHTML = `
+                                <span class="font-medium text-slate-800 text-xs">${index + 1}. ${name}</span>
+                            `;
+                            listContainer.appendChild(rowItem);
+                        });
+                    }
+                }
+            });
         }
     </script>
 </body>
