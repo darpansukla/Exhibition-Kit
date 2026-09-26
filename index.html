@@ -34,6 +34,15 @@
 </head>
 <body class="text-slate-900 flex flex-col min-h-screen select-none">
 
+    <!-- INTRO VIDEO OVERLAY SCREEN (FORCED LANDSCAPE CONTAINER) -->
+    <div id="screen-video-intro" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+        <div id="player-container" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <div id="youtube-player"></div>
+        </div>
+        <!-- Tap blocker overlay to completely prevent user interaction -->
+        <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+    </div>
+
     <!-- Header -->
     <header class="apple-gradient text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md">
         <div>
@@ -197,14 +206,13 @@
         </div>
     </div>
 
+    <!-- YouTube IFrame API Script -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <!-- App Logic Script -->
     <script>
-        // 1. Student Master List CSV (Used for searching and picking students)
         const STUDENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9MYoRpbaJg7oK3vqkTjfsm616eD9xvUeeE3DxTSzWCF5gCdBOdqfnQQbbwbnycXopvrScE5kg-3R6/pub?gid=0&single=true&output=csv";
-        
-        // 2. Admin & Orders Submissions CSV (Used for the admin dashboard summary)
         const ADMIN_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRx5a_SP-qNjx5D8gBDFZaoHgyyOyQezeM1BdBHaLmpqNPGlJ0aHrT1qYbOJtdzlSyRnBz7-OhhE0go/pub?gid=0&single=true&output=csv";
-        
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyhH7TlVYDSODNCzRxnHEd9IIkwuKvgpfFvKFjwJtZ1i3swwyCsxEpxDQReNWwD8E49w/exec";
         const UPI_ID = "sdarpan128@oksbi";
         const FEE_PER_KIT = 500;
@@ -212,6 +220,77 @@
         let studentsData = [];
         let selectedQuantity = 1;
         let selectedStudentsMap = {};
+        let player;
+
+        // Initialize YouTube Iframe Player
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: '9A2Kr1qMHOo',
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'iv_load_policy': 3,
+                    'modestbranding': 1,
+                    'playsinline': 1,
+                    'rel': 0,
+                    'showinfo': 0
+                },
+                events: {
+                    'onReady': (event) => {
+                        event.target.playVideo();
+                        
+                        // Force device screen orientation lock to landscape if supported
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock('landscape').catch(() => {});
+                        }
+
+                        // Force browser into fullscreen mode
+                        const elem = document.getElementById('screen-video-intro');
+                        if (elem.requestFullscreen) {
+                            elem.requestFullscreen().catch(() => {});
+                        } else if (elem.webkitRequestFullscreen) {
+                            elem.webkitRequestFullscreen();
+                        }
+                    },
+                    'onStateChange': (event) => {
+                        // When video ends (YT.PlayerState.ENDED is 0)
+                        if (event.data === 0) {
+                            finishVideoIntro();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Safety fallback timer if video state doesn't trigger automatically
+        setTimeout(() => {
+            const intro = document.getElementById('screen-video-intro');
+            if (intro && !intro.classList.contains('hidden')) {
+                // Keep playing or wait for video completion
+            }
+        }, 120000);
+
+        function finishVideoIntro() {
+            const intro = document.getElementById('screen-video-intro');
+            intro.classList.add('transition-opacity', 'duration-500', 'opacity-0');
+            setTimeout(() => {
+                intro.remove();
+                // Unlock orientation back to user preference
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+                // Exit fullscreen mode to return to regular screen view
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }, 500);
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
