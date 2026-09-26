@@ -16,19 +16,19 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #fcfcfc;
+            background-color: #fff5f5;
         }
         .apple-gradient {
-            background: linear-gradient(135deg, #FF3B30 0%, #D70015 100%);
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
         }
         .liquid-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 59, 48, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.15);
         }
         .apple-shadow {
-            box-shadow: 0 10px 30px -10px rgba(255, 59, 48, 0.25);
+            box-shadow: 0 10px 30px -10px rgba(220, 38, 38, 0.2);
         }
         #youtube-player {
             opacity: 0;
@@ -94,8 +94,8 @@
 
         <!-- LOADING SCREEN -->
         <div id="screen-loading" class="flex flex-col items-center justify-center py-32 space-y-4">
-            <div class="animate-spin rounded-full h-10 w-10 border-3 border-red-500 border-t-transparent"></div>
-            <p class="text-xs text-slate-500 font-medium tracking-wide">Syncing records...</p>
+            <div class="animate-spin rounded-full h-10 w-10 border-3 border-red-600 border-t-transparent"></div>
+            <p class="text-xs text-red-600 font-semibold tracking-wide">Syncing records...</p>
         </div>
 
         <!-- SCREEN 1: CHOOSE QUANTITY -->
@@ -107,16 +107,16 @@
                 </div>
                 
                 <div class="grid grid-cols-4 gap-2.5 pt-1">
-                    <button onclick="setQuantity(1)" class="qty-btn py-3.5 rounded-2xl border-2 border-red-500 bg-red-50 font-bold text-red-600 text-sm transition">1</button>
-                    <button onclick="setQuantity(2)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 font-bold text-slate-700 text-sm transition">2</button>
-                    <button onclick="setQuantity(3)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 font-bold text-slate-700 text-sm transition">3</button>
-                    <button onclick="setQuantity(4)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 font-bold text-slate-700 text-sm transition">4</button>
+                    <button onclick="setQuantity(1)" class="qty-btn py-3.5 rounded-2xl border-2 border-red-600 bg-red-50 font-bold text-red-600 text-sm transition">1</button>
+                    <button onclick="setQuantity(2)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-200 bg-white font-bold text-slate-700 text-sm transition">2</button>
+                    <button onclick="setQuantity(3)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-200 bg-white font-bold text-slate-700 text-sm transition">3</button>
+                    <button onclick="setQuantity(4)" class="qty-btn py-3.5 rounded-2xl border-2 border-slate-200 bg-white font-bold text-slate-700 text-sm transition">4</button>
                 </div>
                 
-                <div class="pt-2 flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                    <span class="text-xs font-medium text-slate-600">Custom count (1-20):</span>
+                <div class="pt-2 flex items-center justify-between bg-red-50/50 p-3 rounded-2xl border border-red-100">
+                    <span class="text-xs font-semibold text-red-900">Custom count (1-20):</span>
                     <input type="number" id="custom-qty" min="1" max="20" value="1" oninput="setCustomQuantity(this.value)" 
-                        class="w-16 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-center text-sm font-bold text-red-600 focus:outline-none focus:border-red-500">
+                        class="w-16 px-3 py-1.5 bg-white border border-red-200 rounded-xl text-center text-sm font-bold text-red-600 focus:outline-none focus:border-red-600">
                 </div>
             </div>
 
@@ -128,12 +128,12 @@
 
         <!-- SCREEN 2: SELECT STUDENTS PER SLOT -->
         <div id="screen-2" class="hidden space-y-4 pt-2">
-            <div class="flex justify-between items-center bg-red-50 border border-red-100/60 p-3.5 rounded-2xl">
+            <div class="flex justify-between items-center bg-red-50 border border-red-200 p-3.5 rounded-2xl">
                 <div>
                     <h3 class="font-bold text-red-900 text-xs tracking-tight flex items-center gap-1.5">
                         <i data-lucide="users" class="w-3.5 h-3.5 text-red-600"></i> Assign Student Slots
                     </h3>
-                    <p class="text-[11px] text-red-600/80 mt-0.5">Search and pick student for each slot</p>
+                    <p class="text-[11px] text-red-700 mt-0.5">Search and pick student for each slot</p>
                 </div>
                 <button onclick="goBackToScreen1()" class="text-xs text-red-600 font-semibold underline flex items-center gap-1">
                     <span>Change Qty</span>
@@ -157,30 +157,46 @@
             </button>
 
             <div class="liquid-card p-5 rounded-3xl apple-shadow space-y-4">
-                <div class="text-center space-y-1 pb-3 border-b border-slate-100">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Payable Amount</span>
+                <div class="text-center space-y-1 pb-3 border-b border-red-100">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-red-500">Total Payable Amount</span>
                     <h2 class="text-3xl font-extrabold text-red-600" id="summary-total-amount">₹500</h2>
                     <p class="text-xs text-slate-500" id="summary-count-text">For 1 student kit</p>
                 </div>
 
-                <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/60 text-xs space-y-2">
+                <div class="bg-red-50/60 p-3.5 rounded-2xl border border-red-100 text-xs space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">UPI ID:</span>
-                        <strong class="text-slate-900 select-all font-mono bg-white px-2 py-1 rounded-lg border border-slate-200">sdarpan128@oksbi</strong>
+                        <span class="text-slate-600 font-medium">UPI ID:</span>
+                        <strong class="text-slate-900 select-all font-mono bg-white px-2 py-1 rounded-lg border border-red-200">sdarpan128@oksbi</strong>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-slate-500">Default Remark:</span>
-                        <strong id="display-remark" class="text-slate-800 font-mono text-[11px] bg-white px-2 py-1 rounded-lg border border-slate-200"></strong>
+                        <span class="text-slate-600 font-medium">Payment Remark:</span>
+                        <strong id="display-remark" class="text-red-700 font-mono text-[11px] bg-white px-2 py-1 rounded-lg border border-red-200"></strong>
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-3">
-                    <div id="qrcode" class="p-2 bg-white flex justify-center"></div>
+                <!-- Hidden high-res container used to draw the exact downloadable card canvas -->
+                <div id="printable-card" class="bg-white border-2 border-red-500 rounded-2xl p-5 shadow-sm space-y-3 flex flex-col items-center">
+                    <div class="text-center border-b border-red-100 pb-2.5 w-full">
+                        <h3 class="font-extrabold text-red-600 text-sm tracking-wide">EXHIBITION KIT PAYMENT QR</h3>
+                        <p id="card-student-remark-label" class="text-[11px] font-mono text-slate-600 mt-1 break-all"></p>
+                    </div>
+                    
+                    <div class="p-3 bg-white border border-slate-200 rounded-xl flex justify-center">
+                        <div id="qrcode"></div>
+                    </div>
+
+                    <div class="text-center space-y-0.5 w-full">
+                        <p class="text-[11px] font-bold text-slate-800">Scan & Pay via GPay, PhonePe, Paytm</p>
+                        <p class="text-[10px] text-red-600 font-semibold">VPA: sdarpan128@oksbi</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-1">
                     <p class="text-[11px] text-slate-600 text-center font-medium">
-                        QR code downloaded automatically! Open GPay, PhonePe, or Paytm and select <strong>"Scan from Gallery"</strong> to pay.
+                        QR code downloaded automatically! Open GPay, PhonePe, or Paytm and select <strong>"Scan from Gallery"</strong>.
                     </p>
-                    <button onclick="triggerQRDownload()" class="w-full bg-red-50 text-red-600 font-semibold py-2.5 rounded-xl text-xs border border-red-200 hover:bg-red-100 transition flex items-center justify-center gap-1.5">
-                        <i data-lucide="download" class="w-4 h-4"></i> Download QR Code Again
+                    <button onclick="downloadFullCard()" class="w-full apple-gradient text-white font-semibold py-3 rounded-2xl text-xs shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download QR Card Again
                     </button>
                 </div>
             </div>
@@ -200,26 +216,26 @@
             
             <div class="space-y-3 overflow-y-auto flex-1 pr-1">
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-red-50 border border-red-100 p-3 rounded-2xl text-center space-y-1">
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-2xl text-center space-y-1">
                         <span class="text-[9px] uppercase font-bold text-red-600 tracking-wider block">Total Students</span>
                         <h2 id="admin-total-students" class="text-xl font-extrabold text-slate-900">0</h2>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl text-center space-y-1">
-                        <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider block">Total Collection</span>
+                    <div class="bg-red-50/50 border border-red-100 p-3 rounded-2xl text-center space-y-1">
+                        <span class="text-[9px] uppercase font-bold text-red-700 tracking-wider block">Total Collection</span>
                         <h2 id="admin-total-collection" class="text-xl font-extrabold text-red-600">₹0</h2>
                     </div>
                 </div>
 
                 <div class="space-y-1.5 pt-1">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Registered Students List</span>
-                    <div id="admin-students-list" class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 max-h-48 overflow-y-auto space-y-1.5 text-xs">
+                    <span class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block">Registered Students List</span>
+                    <div id="admin-students-list" class="bg-red-50/30 border border-red-100 rounded-2xl p-2.5 max-h-48 overflow-y-auto space-y-1.5 text-xs">
                         <p class="text-slate-400 text-center py-4 text-[11px]">Loading names...</p>
                     </div>
                 </div>
             </div>
 
-            <button onclick="closeAdminModal()" class="w-full bg-slate-900 text-white font-semibold py-3 rounded-2xl text-xs mt-auto">
+            <button onclick="closeAdminModal()" class="w-full apple-gradient text-white font-semibold py-3 rounded-2xl text-xs mt-auto">
                 Close Dashboard
             </button>
         </div>
@@ -347,7 +363,7 @@
                     document.getElementById('screen-1').classList.remove('hidden');
                 },
                 error: function() {
-                    document.getElementById('screen-loading').innerHTML = '<p class="text-red-500 text-xs text-center">Failed to load Student list CSV. Check URL.</p>';
+                    document.getElementById('screen-loading').innerHTML = '<p class="text-red-600 text-xs text-center">Failed to load Student list CSV. Check URL.</p>';
                 }
             });
         });
@@ -369,9 +385,9 @@
             const buttons = document.querySelectorAll('.qty-btn');
             buttons.forEach((btn, index) => {
                 if (index + 1 === qty) {
-                    btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-red-500 bg-red-50 font-bold text-red-600 text-sm transition";
+                    btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-red-600 bg-red-50 font-bold text-red-600 text-sm transition";
                 } else {
-                    btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 font-bold text-slate-700 text-sm transition";
+                    btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-slate-200 bg-white font-bold text-slate-700 text-sm transition";
                 }
             });
         }
@@ -383,7 +399,7 @@
             selectedQuantity = parsed;
 
             document.querySelectorAll('.qty-btn').forEach(btn => {
-                btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 font-bold text-slate-700 text-sm transition";
+                btn.className = "qty-btn py-3.5 rounded-2xl border-2 border-slate-200 bg-white font-bold text-slate-700 text-sm transition";
             });
         }
 
@@ -423,31 +439,31 @@
                         <span class="text-xs font-bold text-red-600 uppercase tracking-wide flex items-center gap-1">
                             <i data-lucide="user" class="w-3 h-3"></i> Slot #${i + 1}
                         </span>
-                        <span class="text-[11px] text-slate-400 font-medium">₹500 Fee</span>
+                        <span class="text-[11px] text-red-500 font-medium">₹500 Fee</span>
                     </div>
 
                     <div id="search-box-wrap-${i}" class="space-y-2">
                         <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-red-400">
                                 <i data-lucide="search" class="w-4 h-4"></i>
                             </div>
                             <input type="text" placeholder="Type student name to search..." 
                                 oninput="filterStudents(${i}, this.value)" id="search-slot-${i}"
-                                class="w-full pl-9 pr-3 py-2.5 bg-slate-50/80 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                                class="w-full pl-9 pr-3 py-2.5 bg-red-50/40 border border-red-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                         
-                        <div id="dropdown-slot-${i}" class="hidden bg-white border border-slate-200 rounded-2xl shadow-md max-h-48 overflow-y-auto space-y-1 p-1"></div>
+                        <div id="dropdown-slot-${i}" class="hidden bg-white border border-red-200 rounded-2xl shadow-md max-h-48 overflow-y-auto space-y-1 p-1"></div>
                     </div>
 
-                    <div id="preview-slot-${i}" class="hidden flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <div id="preview-slot-${i}" class="hidden flex items-center justify-between bg-red-50/50 p-2.5 rounded-xl border border-red-200">
                         <div class="flex items-center space-x-3">
                             <img id="img-slot-${i}" src="" class="w-10 h-10 rounded-xl object-cover border bg-white" onerror="this.src='https://via.placeholder.com/40?text=User'">
                             <div>
                                 <h4 id="name-slot-${i}" class="font-bold text-xs text-slate-900"></h4>
-                                <p id="class-slot-${i}" class="text-[10px] text-slate-500"></p>
+                                <p id="class-slot-${i}" class="text-[10px] text-red-600 font-medium"></p>
                             </div>
                         </div>
-                        <button onclick="clearSlot(${i})" class="text-xs text-red-600 font-semibold px-2.5 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition">Change</button>
+                        <button onclick="clearSlot(${i})" class="text-xs text-red-600 font-semibold px-2.5 py-1.5 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition">Change</button>
                     </div>
                 `;
                 container.appendChild(slotDiv);
@@ -530,24 +546,82 @@
             proceedBtn.disabled = (filledCount !== selectedQuantity);
         }
 
-        function triggerQRDownload() {
-            const qrCanvas = document.querySelector('#qrcode canvas');
-            const qrImage = document.querySelector('#qrcode img');
+        function downloadFullCard() {
+            const printableCard = document.getElementById('printable-card');
             
-            let dataUrl = '';
-            if (qrCanvas) {
-                dataUrl = qrCanvas.toDataURL("image/png");
-            } else if (qrImage) {
-                dataUrl = qrImage.src;
-            }
-
-            if (dataUrl) {
-                const downloadLink = document.createElement('a');
-                downloadLink.href = dataUrl;
-                downloadLink.download = `Exhibition_Kit_QR_${Date.now()}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+            // Use HTML5 canvas drawing to capture the full card including remarks and high-contrast QR code
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
+            
+            canvas.width = 800;
+            canvas.height = 950;
+            
+            // Background Card
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Border Outline
+            ctx.strokeStyle = "#DC2626";
+            ctx.lineWidth = 8;
+            ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+            
+            // Header Top Banner
+            ctx.fillStyle = "#DC2626";
+            ctx.fillRect(12, 12, canvas.width - 24, 110);
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 32px Inter, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("EXHIBITION KIT PAYMENT QR", canvas.width / 2, 62);
+            
+            const firstStudentName = selectedStudentsMap[0] ? selectedStudentsMap[0]['Student Name'] : 'Student';
+            const remarkText = selectedQuantity > 1 ? `${firstStudentName}_and_${selectedQuantity - 1}_others_Exhibition_Kit` : `${firstStudentName}_Exhibition_Kit`;
+            
+            ctx.fillStyle = "#FEE2E2";
+            ctx.font = "18px Inter, sans-serif";
+            ctx.fillText(`Remark: ${remarkText}`, canvas.width / 2, 98);
+            
+            // Draw QR Code from DOM element onto canvas with clean high-res scaling
+            const qrImageEl = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
+            if (qrImageEl) {
+                let imgObj = new Image();
+                imgObj.crossOrigin = "anonymous";
+                imgObj.src = qrImageEl.src || qrImageEl.toDataURL();
+                imgObj.onload = function() {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(canvas.width / 2 - 230, 150, 460, 460);
+                    ctx.strokeStyle = "#E2E8F0";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(canvas.width / 2 - 230, 150, 460, 460);
+                    
+                    ctx.drawImage(imgObj, canvas.width / 2 - 200, 180, 400, 400);
+                    
+                    // Footer details
+                    ctx.fillStyle = "#1E293B";
+                    ctx.font = "bold 26px Inter, sans-serif";
+                    ctx.fillText("Scan & Pay via GPay, PhonePe, Paytm", canvas.width / 2, 690);
+                    
+                    ctx.fillStyle = "#DC2626";
+                    ctx.font = "bold 28px Inter, sans-serif";
+                    ctx.fillText(`Amount: ₹${selectedQuantity * FEE_PER_KIT}`, canvas.width / 2, 750);
+                    
+                    ctx.fillStyle = "#64748B";
+                    ctx.font = "20px Inter, sans-serif";
+                    ctx.fillText(`UPI ID: sdarpan128@oksbi`, canvas.width / 2, 810);
+                    
+                    ctx.fillStyle = "#94A3B8";
+                    ctx.font = "italic 16px Inter, sans-serif";
+                    ctx.fillText("Exhibition Kit Portal • Generated for Gallery Upload", canvas.width / 2, 880);
+                    
+                    // Trigger Download
+                    let dataUrl = canvas.toDataURL("image/png");
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = `Exhibition_Kit_Payment_QR_${Date.now()}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                };
             }
         }
 
@@ -585,24 +659,27 @@
             const remark = selectedQuantity > 1 ? `${firstStudentName}_and_${selectedQuantity - 1}_others_Exhibition_Kit` : `${firstStudentName}_Exhibition_Kit`;
             
             document.getElementById('display-remark').innerText = remark;
+            document.getElementById('card-student-remark-label').innerText = `Note: ${remark}`;
 
             const upiString = `upi://pay?pa=${UPI_ID}&pn=ExhibitionKit&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(remark)}`;
 
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = "";
+            
+            // CorrectLevel.H configured to ensure Google Pay & PhonePe easily recognize and scan code
             new QRCode(qrContainer, {
                 text: upiString,
-                width: 180,
-                height: 180,
-                colorDark: "#111827",
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
 
-            // Automatically download QR code shortly after render
+            // Automatically download the complete branded QR card after brief render delay
             setTimeout(() => {
-                triggerQRDownload();
-            }, 600);
+                downloadFullCard();
+            }, 700);
 
             lucide.createIcons();
         }
@@ -659,7 +736,7 @@
                         listContainer.innerHTML = '';
                         allNamesList.forEach((name, index) => {
                             const rowItem = document.createElement('div');
-                            rowItem.className = "flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-slate-100";
+                            rowItem.className = "flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-red-100";
                             rowItem.innerHTML = `
                                 <span class="font-medium text-slate-800 text-xs">${index + 1}. ${name}</span>
                             `;
