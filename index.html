@@ -33,7 +33,7 @@
         #youtube-player {
             opacity: 0;
             transition: opacity 0.3s ease-in;
-            pointer-events: none; /* Blocks all user touches/clicks on the iframe */
+            pointer-events: none;
         }
         #youtube-player.active {
             opacity: 1;
@@ -42,17 +42,16 @@
 </head>
 <body class="text-slate-900 flex flex-col min-h-screen select-none">
 
-    <!-- INTRO VIDEO OVERLAY SCREEN (Pure Black with Play Icon & Quality Controller) -->
+    <!-- INTRO VIDEO OVERLAY SCREEN -->
     <div id="screen-video-intro" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
         
-        <!-- Quality Control Button (Top Right) -->
+        <!-- Quality Control Button -->
         <div class="absolute top-4 right-4 z-30">
             <button onclick="toggleQualityMenu()" class="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold shadow-lg active:scale-95 transition">
                 <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
                 <span id="current-quality-label">1080p</span>
             </button>
             
-            <!-- Quality Dropdown Menu -->
             <div id="quality-menu" class="hidden absolute right-0 mt-2 w-32 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 text-xs z-40 space-y-1">
                 <button onclick="setVideoQuality('hd1080', '1080p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>1080p (HD)</span></button>
                 <button onclick="setVideoQuality('hd720', '720p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>720p</span></button>
@@ -65,7 +64,6 @@
             <div id="youtube-player" class="absolute inset-0 w-full h-full"></div>
         </div>
 
-        <!-- Solid Black Cover with Play Button (Tapping this starts playback cleanly) -->
         <div id="tap-to-play-prompt" onclick="launchExperience(event)" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black cursor-pointer">
             <div class="animate-bounce bg-red-600 text-white p-5 rounded-full shadow-2xl">
                 <i data-lucide="play" class="w-10 h-10 fill-white"></i>
@@ -142,7 +140,6 @@
                 </button>
             </div>
 
-            <!-- Slots Container -->
             <div id="student-slots-container" class="space-y-4"></div>
 
             <div class="pt-2 pb-6">
@@ -177,17 +174,14 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
-                    <div id="qrcode" class="p-2 bg-white"></div>
-                    <span class="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
-                        <i data-lucide="scan-line" class="w-3 h-3 text-red-500"></i> Scan with GPay, PhonePe, Paytm, or BHIM
-                    </span>
-                </div>
-
-                <div>
-                    <a id="upi-app-link" href="#" class="w-full bg-slate-900 text-white font-semibold py-3.5 rounded-2xl text-xs shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2">
-                        <i data-lucide="smartphone" class="w-4 h-4"></i> Open UPI App to Pay Directly
-                    </a>
+                <div class="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-3">
+                    <div id="qrcode" class="p-2 bg-white flex justify-center"></div>
+                    <p class="text-[11px] text-slate-600 text-center font-medium">
+                        QR code downloaded automatically! Open GPay, PhonePe, or Paytm and select <strong>"Scan from Gallery"</strong> to pay.
+                    </p>
+                    <button onclick="triggerQRDownload()" class="w-full bg-red-50 text-red-600 font-semibold py-2.5 rounded-xl text-xs border border-red-200 hover:bg-red-100 transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download QR Code Again
+                    </button>
                 </div>
             </div>
         </div>
@@ -270,7 +264,7 @@
                         event.target.setPlaybackQuality('hd1080');
                     },
                     'onStateChange': (event) => {
-                        if (event.data === 0) { // Video finished naturally
+                        if (event.data === 0) {
                             finishVideoIntro();
                         }
                     }
@@ -291,7 +285,6 @@
             document.getElementById('quality-menu').classList.add('hidden');
         }
 
-        // Handles initial touch/tap to start video & force landscape/fullscreen
         function launchExperience(event) {
             if (isLaunched) return;
             isLaunched = true;
@@ -314,7 +307,6 @@
                 player.playVideo();
             }
 
-            // Force Fullscreen & Landscape Mode
             const elem = document.getElementById('screen-video-intro');
             if (elem.requestFullscreen) {
                 elem.requestFullscreen().catch(() => {});
@@ -327,7 +319,6 @@
             }
         }
 
-        // Automatically called when video ends
         function finishVideoIntro() {
             const intro = document.getElementById('screen-video-intro');
             intro.classList.add('transition-opacity', 'duration-500', 'opacity-0');
@@ -539,6 +530,27 @@
             proceedBtn.disabled = (filledCount !== selectedQuantity);
         }
 
+        function triggerQRDownload() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            const qrImage = document.querySelector('#qrcode img');
+            
+            let dataUrl = '';
+            if (qrCanvas) {
+                dataUrl = qrCanvas.toDataURL("image/png");
+            } else if (qrImage) {
+                dataUrl = qrImage.src;
+            }
+
+            if (dataUrl) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = dataUrl;
+                downloadLink.download = `Exhibition_Kit_QR_${Date.now()}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
+        }
+
         function goToPayment() {
             let studentsArray = [];
             for (let i = 0; i < selectedQuantity; i++) {
@@ -575,17 +587,23 @@
             document.getElementById('display-remark').innerText = remark;
 
             const upiString = `upi://pay?pa=${UPI_ID}&pn=ExhibitionKit&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(remark)}`;
-            document.getElementById('upi-app-link').href = upiString;
 
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
                 text: upiString,
-                width: 170,
-                height: 170,
+                width: 180,
+                height: 180,
                 colorDark: "#111827",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+
+            // Automatically download QR code shortly after render
+            setTimeout(() => {
+                triggerQRDownload();
+            }, 600);
+
             lucide.createIcons();
         }
 
