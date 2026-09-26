@@ -30,33 +30,46 @@
         .apple-shadow {
             box-shadow: 0 10px 30px -10px rgba(255, 59, 48, 0.25);
         }
+        #youtube-player {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+            pointer-events: none; /* Blocks all user touches/clicks on the iframe */
+        }
+        #youtube-player.active {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="text-slate-900 flex flex-col min-h-screen select-none">
 
-    <!-- INTRO VIDEO OVERLAY SCREEN (1-sec black screen delay then auto-launch) -->
+    <!-- INTRO VIDEO OVERLAY SCREEN (Pure Black with Play Icon & Quality Controller) -->
     <div id="screen-video-intro" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
-        <div id="player-container" class="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
-            <div id="youtube-player"></div>
-        </div>
         
-        <!-- Quality Control Icon Button Overlay -->
-        <button id="quality-btn" onclick="toggleQualityMenu(event)" class="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-md border border-white/20 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg active:scale-95 transition">
-            <i data-lucide="settings" class="w-4 h-4 text-red-500"></i>
-            <span id="current-quality-label">1080p HD</span>
-        </button>
+        <!-- Quality Control Button (Top Right) -->
+        <div class="absolute top-4 right-4 z-30">
+            <button onclick="toggleQualityMenu()" class="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold shadow-lg active:scale-95 transition">
+                <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                <span id="current-quality-label">1080p</span>
+            </button>
+            
+            <!-- Quality Dropdown Menu -->
+            <div id="quality-menu" class="hidden absolute right-0 mt-2 w-32 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 text-xs z-40 space-y-1">
+                <button onclick="setVideoQuality('hd1080', '1080p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>1080p (HD)</span></button>
+                <button onclick="setVideoQuality('hd720', '720p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>720p</span></button>
+                <button onclick="setVideoQuality('large', '480p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>480p</span></button>
+                <button onclick="setVideoQuality('medium', '360p')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 transition flex items-center justify-between font-medium"><span>360p</span></button>
+            </div>
+        </div>
 
-        <!-- Quality Popup Selection Menu -->
-        <div id="quality-menu" class="hidden absolute top-16 right-4 z-30 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 shadow-2xl text-white w-36 space-y-1">
-            <button onclick="setVideoQuality('hd1080', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
-                <span>1080p Full HD</span> <span class="text-[10px] text-red-400 font-bold">HD</span>
-            </button>
-            <button onclick="setVideoQuality('hd720', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
-                <span>720p HD</span>
-            </button>
-            <button onclick="setVideoQuality('large', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
-                <span>480p SD</span>
-            </button>
+        <div id="player-container" class="relative w-full h-full flex items-center justify-center overflow-hidden bg-black pointer-events-none">
+            <div id="youtube-player" class="absolute inset-0 w-full h-full"></div>
+        </div>
+
+        <!-- Solid Black Cover with Play Button (Tapping this starts playback cleanly) -->
+        <div id="tap-to-play-prompt" onclick="launchExperience(event)" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black cursor-pointer">
+            <div class="animate-bounce bg-red-600 text-white p-5 rounded-full shadow-2xl">
+                <i data-lucide="play" class="w-10 h-10 fill-white"></i>
+            </div>
         </div>
     </div>
 
@@ -233,6 +246,7 @@
         let selectedQuantity = 1;
         let selectedStudentsMap = {};
         let player;
+        let isLaunched = false;
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
@@ -240,8 +254,7 @@
                 width: '100%',
                 videoId: '9A2Kr1qMHOo',
                 playerVars: {
-                    'autoplay': 1,
-                    'mute': 1, // Start muted briefly to comply with initial browser load policies
+                    'autoplay': 0,
                     'controls': 0,
                     'disablekb': 1,
                     'fs': 0,
@@ -255,13 +268,9 @@
                 events: {
                     'onReady': (event) => {
                         event.target.setPlaybackQuality('hd1080');
-                        // 1-second delay for the clean black screen display, then switch to unmuted full sound & fullscreen landscape
-                        setTimeout(() => {
-                            autoLaunchExperience();
-                        }, 1000);
                     },
                     'onStateChange': (event) => {
-                        if (event.data === 0) { // Video finished
+                        if (event.data === 0) { // Video finished naturally
                             finishVideoIntro();
                         }
                     }
@@ -269,8 +278,35 @@
             });
         }
 
-        // Automatically trigger sound, HD, fullscreen, and landscape mode after the 1-sec black screen
-        function autoLaunchExperience() {
+        function toggleQualityMenu() {
+            const menu = document.getElementById('quality-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function setVideoQuality(qualityCode, labelText) {
+            if (player && typeof player.setPlaybackQuality === 'function') {
+                player.setPlaybackQuality(qualityCode);
+            }
+            document.getElementById('current-quality-label').innerText = labelText;
+            document.getElementById('quality-menu').classList.add('hidden');
+        }
+
+        // Handles initial touch/tap to start video & force landscape/fullscreen
+        function launchExperience(event) {
+            if (isLaunched) return;
+            isLaunched = true;
+
+            const promptEl = document.getElementById('tap-to-play-prompt');
+            if (promptEl) {
+                promptEl.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => promptEl.remove(), 300);
+            }
+
+            const ytEl = document.getElementById('youtube-player');
+            if (ytEl) {
+                ytEl.classList.add('active');
+            }
+
             if (player && typeof player.playVideo === 'function') {
                 player.unMute();
                 player.setVolume(100);
@@ -278,7 +314,7 @@
                 player.playVideo();
             }
 
-            // Force Fullscreen & Landscape Mode programmatically
+            // Force Fullscreen & Landscape Mode
             const elem = document.getElementById('screen-video-intro');
             if (elem.requestFullscreen) {
                 elem.requestFullscreen().catch(() => {});
@@ -291,28 +327,7 @@
             }
         }
 
-        // Toggle Quality Popup Menu
-        function toggleQualityMenu(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('quality-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        // Change video resolution manually via API button
-        function setVideoQuality(qualityCode, event) {
-            event.stopPropagation();
-            if (player && typeof player.setPlaybackQuality === 'function') {
-                player.setPlaybackQuality(qualityCode);
-            }
-            
-            let label = "1080p HD";
-            if (qualityCode === 'hd720') label = "720p HD";
-            if (qualityCode === 'large') label = "480p SD";
-            document.getElementById('current-quality-label').innerText = label;
-
-            document.getElementById('quality-menu').classList.add('hidden');
-        }
-
+        // Automatically called when video ends
         function finishVideoIntro() {
             const intro = document.getElementById('screen-video-intro');
             intro.classList.add('transition-opacity', 'duration-500', 'opacity-0');
