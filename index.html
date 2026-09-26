@@ -34,13 +34,30 @@
 </head>
 <body class="text-slate-900 flex flex-col min-h-screen select-none">
 
-    <!-- INTRO VIDEO OVERLAY SCREEN (FORCED LANDSCAPE CONTAINER) -->
+    <!-- INTRO VIDEO OVERLAY SCREEN (1-sec black screen delay then auto-launch) -->
     <div id="screen-video-intro" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
-        <div id="player-container" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+        <div id="player-container" class="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
             <div id="youtube-player"></div>
         </div>
-        <!-- Tap blocker overlay to completely prevent user interaction -->
-        <div class="absolute inset-0 z-10 bg-transparent pointer-events-auto"></div>
+        
+        <!-- Quality Control Icon Button Overlay -->
+        <button id="quality-btn" onclick="toggleQualityMenu(event)" class="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-md border border-white/20 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg active:scale-95 transition">
+            <i data-lucide="settings" class="w-4 h-4 text-red-500"></i>
+            <span id="current-quality-label">1080p HD</span>
+        </button>
+
+        <!-- Quality Popup Selection Menu -->
+        <div id="quality-menu" class="hidden absolute top-16 right-4 z-30 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 shadow-2xl text-white w-36 space-y-1">
+            <button onclick="setVideoQuality('hd1080', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
+                <span>1080p Full HD</span> <span class="text-[10px] text-red-400 font-bold">HD</span>
+            </button>
+            <button onclick="setVideoQuality('hd720', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
+                <span>720p HD</span>
+            </button>
+            <button onclick="setVideoQuality('large', event)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-600 transition flex items-center justify-between">
+                <span>480p SD</span>
+            </button>
+        </div>
     </div>
 
     <!-- Header -->
@@ -52,7 +69,6 @@
             <p class="text-[10px] text-red-100 font-medium tracking-wide">Made by Darpan Sukla</p>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Hidden Admin Icon Trigger -->
             <button onclick="openAdminPrompt()" class="p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10 text-white active:scale-95 transition" title="Admin">
                 <i data-lucide="shield-check" class="w-4 h-4"></i>
             </button>
@@ -137,7 +153,6 @@
                     <p class="text-xs text-slate-500" id="summary-count-text">For 1 student kit</p>
                 </div>
 
-                <!-- UPI Details Box -->
                 <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/60 text-xs space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="text-slate-500">UPI ID:</span>
@@ -149,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- QR Code Block -->
                 <div class="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                     <div id="qrcode" class="p-2 bg-white"></div>
                     <span class="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
@@ -157,7 +171,6 @@
                     </span>
                 </div>
 
-                <!-- Direct App Trigger Button -->
                 <div>
                     <a id="upi-app-link" href="#" class="w-full bg-slate-900 text-white font-semibold py-3.5 rounded-2xl text-xs shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2">
                         <i data-lucide="smartphone" class="w-4 h-4"></i> Open UPI App to Pay Directly
@@ -191,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- Registered Students List Section -->
                 <div class="space-y-1.5 pt-1">
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Registered Students List</span>
                     <div id="admin-students-list" class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 max-h-48 overflow-y-auto space-y-1.5 text-xs">
@@ -222,7 +234,6 @@
         let selectedStudentsMap = {};
         let player;
 
-        // Initialize YouTube Iframe Player
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
                 height: '100%',
@@ -230,35 +241,27 @@
                 videoId: '9A2Kr1qMHOo',
                 playerVars: {
                     'autoplay': 1,
+                    'mute': 1, // Start muted briefly to comply with initial browser load policies
                     'controls': 0,
                     'disablekb': 1,
                     'fs': 0,
                     'iv_load_policy': 3,
                     'modestbranding': 1,
-                    'playsinline': 1,
+                    'playsinline': 0,
                     'rel': 0,
-                    'showinfo': 0
+                    'showinfo': 0,
+                    'vq': 'hd1080'
                 },
                 events: {
                     'onReady': (event) => {
-                        event.target.playVideo();
-                        
-                        // Force device screen orientation lock to landscape if supported
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock('landscape').catch(() => {});
-                        }
-
-                        // Force browser into fullscreen mode
-                        const elem = document.getElementById('screen-video-intro');
-                        if (elem.requestFullscreen) {
-                            elem.requestFullscreen().catch(() => {});
-                        } else if (elem.webkitRequestFullscreen) {
-                            elem.webkitRequestFullscreen();
-                        }
+                        event.target.setPlaybackQuality('hd1080');
+                        // 1-second delay for the clean black screen display, then switch to unmuted full sound & fullscreen landscape
+                        setTimeout(() => {
+                            autoLaunchExperience();
+                        }, 1000);
                     },
                     'onStateChange': (event) => {
-                        // When video ends (YT.PlayerState.ENDED is 0)
-                        if (event.data === 0) {
+                        if (event.data === 0) { // Video finished
                             finishVideoIntro();
                         }
                     }
@@ -266,24 +269,58 @@
             });
         }
 
-        // Safety fallback timer if video state doesn't trigger automatically
-        setTimeout(() => {
-            const intro = document.getElementById('screen-video-intro');
-            if (intro && !intro.classList.contains('hidden')) {
-                // Keep playing or wait for video completion
+        // Automatically trigger sound, HD, fullscreen, and landscape mode after the 1-sec black screen
+        function autoLaunchExperience() {
+            if (player && typeof player.playVideo === 'function') {
+                player.unMute();
+                player.setVolume(100);
+                player.setPlaybackQuality('hd1080');
+                player.playVideo();
             }
-        }, 120000);
+
+            // Force Fullscreen & Landscape Mode programmatically
+            const elem = document.getElementById('screen-video-intro');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+        }
+
+        // Toggle Quality Popup Menu
+        function toggleQualityMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('quality-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Change video resolution manually via API button
+        function setVideoQuality(qualityCode, event) {
+            event.stopPropagation();
+            if (player && typeof player.setPlaybackQuality === 'function') {
+                player.setPlaybackQuality(qualityCode);
+            }
+            
+            let label = "1080p HD";
+            if (qualityCode === 'hd720') label = "720p HD";
+            if (qualityCode === 'large') label = "480p SD";
+            document.getElementById('current-quality-label').innerText = label;
+
+            document.getElementById('quality-menu').classList.add('hidden');
+        }
 
         function finishVideoIntro() {
             const intro = document.getElementById('screen-video-intro');
             intro.classList.add('transition-opacity', 'duration-500', 'opacity-0');
             setTimeout(() => {
                 intro.remove();
-                // Unlock orientation back to user preference
                 if (screen.orientation && screen.orientation.unlock) {
                     screen.orientation.unlock();
                 }
-                // Exit fullscreen mode to return to regular screen view
                 if (document.exitFullscreen) {
                     document.exitFullscreen().catch(() => {});
                 } else if (document.webkitExitFullscreen) {
@@ -294,7 +331,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // Load student directory for search
             Papa.parse(STUDENT_CSV_URL, {
                 download: true,
                 header: true,
@@ -538,7 +574,6 @@
             lucide.createIcons();
         }
 
-        // Admin Security & Summary Calculations
         function openAdminPrompt() {
             const pin = prompt("Enter Admin PIN:");
             if (pin === "1998") {
