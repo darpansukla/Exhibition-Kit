@@ -192,11 +192,11 @@
                 </div>
 
                 <div class="space-y-3 pt-1">
-                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-amber-800 text-[11px] text-center font-medium">
-                        Tap the button below to instantly save your payment card to your phone gallery for GPay / PhonePe upload.
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-xl text-red-800 text-[11px] text-center font-medium">
+                        Tap the button below to download your payment card to your phone gallery. Then open GPay / PhonePe and select <strong>"Scan from Gallery"</strong>.
                     </div>
                     <button onclick="downloadFullCard()" class="w-full apple-gradient text-white font-bold py-4 rounded-2xl text-sm shadow-lg active:scale-[0.98] transition flex items-center justify-center gap-2">
-                        <i data-lucide="download" class="w-5 h-5"></i> Download QR Code Card Now
+                        <i data-lucide="download" class="w-5 h-5"></i> Download Full QR Card Now
                     </button>
                 </div>
             </div>
@@ -549,7 +549,7 @@
         function downloadFullCard() {
             const qrImageEl = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
             if (!qrImageEl) {
-                alert("QR Code is generating, please wait a second and try again.");
+                alert("QR Code is generating, please wait a moment and try again.");
                 return;
             }
 
@@ -614,18 +614,28 @@
                 ctx.font = "italic 16px Inter, sans-serif";
                 ctx.fillText("Exhibition Kit Portal • Gallery Upload Ready", canvas.width / 2, 870);
                 
-                // Force mobile download via direct data-uri link trigger
+                // Reliable cross-platform and mobile data-uri download method
                 let dataUrl = canvas.toDataURL("image/png", 1.0);
-                const downloadLink = document.createElement('a');
-                downloadLink.href = dataUrl;
-                downloadLink.download = `Exhibition_Kit_Payment_${Date.now()}.png`;
                 
-                // Append to body for mobile browser compatibility
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                setTimeout(() => {
-                    document.body.removeChild(downloadLink);
-                }, 100);
+                // Open fallback/direct window for devices blocking virtual link clicks
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    let win = window.open();
+                    if (win) {
+                        win.document.write(`<iframe src="${dataUrl}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                    } else {
+                        window.location.href = dataUrl;
+                    }
+                } else {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = `Exhibition_Kit_Payment_${Date.now()}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                    }, 100);
+                }
             };
         }
 
