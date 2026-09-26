@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- QRCode generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- html2canvas for flawless image download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -174,7 +176,7 @@
                     </div>
                 </div>
 
-                <!-- Hidden container used to render crisp QR code -->
+                <!-- Printable Card Container captured cleanly as an image via html2canvas -->
                 <div id="printable-card" class="bg-white border-2 border-red-500 rounded-2xl p-5 shadow-sm space-y-3 flex flex-col items-center">
                     <div class="text-center border-b border-red-100 pb-2.5 w-full">
                         <h3 class="font-extrabold text-red-600 text-sm tracking-wide">EXHIBITION KIT PAYMENT QR</h3>
@@ -193,10 +195,10 @@
 
                 <div class="space-y-3 pt-1">
                     <div class="bg-red-50 border border-red-200 p-3 rounded-xl text-red-800 text-[11px] text-center font-medium">
-                        Tap the button below to download your payment card to your phone gallery. Then open GPay / PhonePe and select <strong>"Scan from Gallery"</strong>.
+                        Tap below to download your payment card as an image. Open GPay/PhonePe and select <strong>"Scan from Gallery"</strong>.
                     </div>
-                    <button onclick="downloadFullCard()" class="w-full apple-gradient text-white font-bold py-4 rounded-2xl text-sm shadow-lg active:scale-[0.98] transition flex items-center justify-center gap-2">
-                        <i data-lucide="download" class="w-5 h-5"></i> Download Full QR Card Now
+                    <button onclick="downloadCardAsImage()" id="download-img-btn" class="w-full apple-gradient text-white font-bold py-4 rounded-2xl text-sm shadow-lg active:scale-[0.98] transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5"></i> Download as Image
                     </button>
                 </div>
             </div>
@@ -546,87 +548,41 @@
             proceedBtn.disabled = (filledCount !== selectedQuantity);
         }
 
-        function downloadFullCard() {
-            const qrImageEl = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
-            if (!qrImageEl) {
-                alert("QR Code is generating, please wait a moment and try again.");
-                return;
-            }
+        // Direct html2canvas Image Download Feature
+        function downloadCardAsImage() {
+            const cardElement = document.getElementById('printable-card');
+            const btn = document.getElementById('download-img-btn');
+            
+            btn.innerText = "Generating Image...";
+            btn.disabled = true;
 
-            let canvas = document.createElement('canvas');
-            let ctx = canvas.getContext('2d');
-            
-            canvas.width = 800;
-            canvas.height = 950;
-            
-            // Clean white background card
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Border outline
-            ctx.strokeStyle = "#DC2626";
-            ctx.lineWidth = 8;
-            ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
-            
-            // Header Top Banner
-            ctx.fillStyle = "#DC2626";
-            ctx.fillRect(12, 12, canvas.width - 24, 110);
-            
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 30px Inter, sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("EXHIBITION KIT PAYMENT QR", canvas.width / 2, 60);
-            
-            const firstStudentName = selectedStudentsMap[0] ? selectedStudentsMap[0]['Student Name'] : 'Student';
-            const remarkText = selectedQuantity > 1 ? `${firstStudentName}_and_${selectedQuantity - 1}_others_Exhibition_Kit` : `${firstStudentName}_Exhibition_Kit`;
-            
-            ctx.fillStyle = "#FEE2E2";
-            ctx.font = "18px Inter, sans-serif";
-            ctx.fillText(`Remark: ${remarkText}`, canvas.width / 2, 98);
-            
-            // Draw QR code crisp image onto canvas
-            let imgObj = new Image();
-            imgObj.crossOrigin = "anonymous";
-            imgObj.src = qrImageEl.src || qrImageEl.toDataURL();
-            imgObj.onload = function() {
-                ctx.fillStyle = "#FFFFFF";
-                ctx.fillRect(canvas.width / 2 - 220, 150, 440, 440);
-                ctx.strokeStyle = "#CBD5E1";
-                ctx.lineWidth = 2;
-                ctx.strokeRect(canvas.width / 2 - 220, 150, 440, 440);
-                
-                ctx.drawImage(imgObj, canvas.width / 2 - 190, 180, 380, 380);
-                
-                // Details footer
-                ctx.fillStyle = "#1E293B";
-                ctx.font = "bold 24px Inter, sans-serif";
-                ctx.fillText("Scan & Pay via GPay, PhonePe, Paytm", canvas.width / 2, 670);
-                
-                ctx.fillStyle = "#DC2626";
-                ctx.font = "bold 28px Inter, sans-serif";
-                ctx.fillText(`Amount: ₹${selectedQuantity * FEE_PER_KIT}`, canvas.width / 2, 730);
-                
-                ctx.fillStyle = "#475569";
-                ctx.font = "20px Inter, sans-serif";
-                ctx.fillText(`UPI ID: sdarpan128@oksbi`, canvas.width / 2, 790);
-                
-                ctx.fillStyle = "#94A3B8";
-                ctx.font = "italic 16px Inter, sans-serif";
-                ctx.fillText("Exhibition Kit Portal • Gallery Upload Ready", canvas.width / 2, 870);
-                
-                // Reliable cross-platform and mobile data-uri download method
+            html2canvas(cardElement, {
+                scale: 3, // High resolution for crisp scanning
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
                 let dataUrl = canvas.toDataURL("image/png", 1.0);
                 
-                // Open fallback/direct window for devices blocking virtual link clicks
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
                 if (isMobile) {
+                    // Open preview window / direct mobile data URL prompt
                     let win = window.open();
                     if (win) {
-                        win.document.write(`<iframe src="${dataUrl}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                        win.document.write(`
+                            <html>
+                            <head><title>Save Payment QR</title></head>
+                            <body style="margin:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
+                                <p style="color:#fff; font-family:sans-serif; font-size:14px; margin-bottom:12px; text-align:center;">Press and hold the image below, then choose <b>"Download image"</b> or <b>"Add to Photos"</b></p>
+                                <img src="${dataUrl}" style="max-width:90%; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.5);" />
+                            </body>
+                            </html>
+                        `);
                     } else {
                         window.location.href = dataUrl;
                     }
                 } else {
+                    // Desktop direct download anchor
                     const downloadLink = document.createElement('a');
                     downloadLink.href = dataUrl;
                     downloadLink.download = `Exhibition_Kit_Payment_${Date.now()}.png`;
@@ -636,7 +592,17 @@
                         document.body.removeChild(downloadLink);
                     }, 100);
                 }
-            };
+
+                btn.innerHTML = '<i data-lucide="download" class="w-5 h-5"></i> Download as Image';
+                btn.disabled = false;
+                lucide.createIcons();
+            }).catch(err => {
+                console.error("Image generation error:", err);
+                alert("Failed to capture image. Please try taking a screenshot.");
+                btn.innerHTML = '<i data-lucide="download" class="w-5 h-5"></i> Download as Image';
+                btn.disabled = false;
+                lucide.createIcons();
+            });
         }
 
         function goToPayment() {
@@ -682,8 +648,8 @@
             
             new QRCode(qrContainer, {
                 text: upiString,
-                width: 220,
-                height: 220,
+                width: 200,
+                height: 200,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
